@@ -1,18 +1,24 @@
+import '../src/App.css';
+
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { moveBlock, selectBlock, filterBlocks, addNote, addBlock, removeBlock, showPrompt, hidePrompt, setAdditionalData } from './store';
+import {
+    moveBlock, selectBlock, filterBlocks, addNote, addBlock,
+    removeBlock, showPrompt, hidePrompt, setAdditionalData, updateBlock
+} from './store';
+import './App.css';  // Import the CSS file
 
-const stageOrder = ['To Do', 'In Progress', 'Done'];  // Define the order of stages
+const stageOrder = ['To Do', 'In Progress', 'Done'];
 
 const App = () => {
     const dispatch = useDispatch();
     const { blocks, stages, filterText, selectedBlock, prompt } = useSelector(state => state);
     const [note, setNote] = useState('');
     const [newTaskName, setNewTaskName] = useState('');
+    const [editTaskId, setEditTaskId] = useState(null);  // Track task being edited
+    const [editTaskName, setEditTaskName] = useState('');  // Track the name being edited
 
-    const handleDragStart = (blockId) => {
-        return blockId;
-    };
+    const handleDragStart = (blockId) => blockId;
 
     const handleDrop = (e, newStage) => {
         const blockId = e.dataTransfer.getData('text');
@@ -51,11 +57,33 @@ const App = () => {
         if (newTaskName.trim()) {
             dispatch(addBlock({ name: newTaskName }));
             setNewTaskName('');
+        } else {
+            alert("Task name cannot be empty.");
         }
     };
 
     const handleRemoveTask = (blockId) => {
         dispatch(removeBlock(blockId));
+    };
+
+    const handleEditTask = (block) => {
+        setEditTaskId(block.id);
+        setEditTaskName(block.name);  // Pre-fill the input with the current task name
+    };
+
+    const handleSaveEdit = () => {
+        if (editTaskName.trim()) {
+            dispatch(updateBlock({ blockId: editTaskId, newName: editTaskName }));
+            setEditTaskId(null);
+            setEditTaskName('');
+        } else {
+            alert("Task name cannot be empty.");
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditTaskId(null);
+        setEditTaskName('');
     };
 
     const handlePromptSubmit = () => {
@@ -74,50 +102,39 @@ const App = () => {
         dispatch(setAdditionalData(e.target.value));
     };
 
-    // Filter and sort blocks
     const filteredBlocks = blocks
         .filter(block => block.name.toLowerCase().includes(filterText))
         .sort((a, b) => {
             const stageComparison = stageOrder.indexOf(a.stage) - stageOrder.indexOf(b.stage);
-            if (stageComparison === 0) {
-                return a.id - b.id;  // Optionally sort by ID if blocks are in the same stage
-            }
-            return stageComparison;
+            return stageComparison === 0 ? a.id - b.id : stageComparison;
         });
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'Arial' }}>
+        <div className="app-container">
             <input
                 type="text"
                 placeholder="Search by name..."
                 onChange={handleFilter}
-                style={{ marginBottom: '20px', padding: '5px' }}
+                className="filter-input"
             />
 
-            <div style={{ marginBottom: '20px' }}>
+            <div className="task-input">
                 <input
                     type="text"
                     value={newTaskName}
                     onChange={(e) => setNewTaskName(e.target.value)}
                     placeholder="New Task Name"
-                    style={{ padding: '5px', marginRight: '10px' }}
                 />
-                <button onClick={handleAddTask} style={{ padding: '5px' }}>
+                <button onClick={handleAddTask}>
                     Add Task
                 </button>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="stage-container">
                 {stages.map(stage => (
                     <div
                         key={stage}
-                        style={{
-                            flex: 1,
-                            padding: '10px',
-                            backgroundColor: '#E5F0F1',
-                            margin: '0 10px',
-                            borderRadius: '5px'
-                        }}
+                        className="stage"
                         onDrop={(e) => handleDrop(e, stage)}
                         onDragOver={(e) => e.preventDefault()}
                     >
@@ -130,35 +147,43 @@ const App = () => {
                                     draggable
                                     onDragStart={(e) => e.dataTransfer.setData('text', handleDragStart(block.id))}
                                     onClick={() => dispatch(selectBlock(block))}
-                                    style={{
-                                        padding: '10px',
-                                        margin: '10px 0',
-                                        backgroundColor: '#4A508E',
-                                        color: 'white',
-                                        borderRadius: '5px',
-                                        cursor: 'pointer',
-                                        position: 'relative'
-                                    }}
+                                    className="block-item"
                                 >
-                                    {block.name}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();  // Prevent triggering onClick for block
-                                            handleRemoveTask(block.id);
-                                        }}
-                                        style={{
-                                            position: 'absolute',
-                                            top: '5px',
-                                            right: '5px',
-                                            backgroundColor: 'red',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '50%',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        X
-                                    </button>
+                                    {editTaskId === block.id ? (
+                                        <div>
+                                            <input
+                                                type="text"
+                                                value={editTaskName}
+                                                onChange={(e) => setEditTaskName(e.target.value)}
+                                            />
+                                            <button onClick={handleSaveEdit}>Save</button>
+                                            <button onClick={handleCancelEdit} className="cancel-btn">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className='edit_remove'>
+                                            {block.name}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditTask(block);
+                                                }}
+                                                className="edit-btn"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRemoveTask(block.id);
+                                                }}
+                                                className="remove-btn"
+                                            >
+                                                X
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                     </div>
@@ -166,7 +191,7 @@ const App = () => {
             </div>
 
             {selectedBlock && (
-                <div style={{ marginTop: '20px', padding: '20px', backgroundColor: '#00DC82', color: 'white', borderRadius: '5px' }}>
+                <div className="selected-block">
                     <h3>{selectedBlock.name}</h3>
                     <p>Current Stage: {selectedBlock.stage}</p>
                     <h4>History:</h4>
@@ -181,9 +206,8 @@ const App = () => {
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                             placeholder="Add a note..."
-                            style={{ padding: '5px', marginTop: '10px' }}
                         />
-                        <button onClick={handleAddNote} style={{ marginLeft: '10px', padding: '5px' }}>
+                        <button onClick={handleAddNote}>
                             Add Note
                         </button>
                     </div>
@@ -191,33 +215,21 @@ const App = () => {
             )}
 
             {prompt.show && (
-                <div style={{
-                    position: 'fixed',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    padding: '20px',
-                    backgroundColor: 'white',
-                    borderRadius: '5px',
-                    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)'
-                }}>
+                <div className="prompt-modal">
                     <h3>Additional Information</h3>
                     <p>Provide any additional data required for this transition:</p>
                     <input
                         type="text"
-                        value={prompt.additionalData}
+                        value={prompt.additionalData || ''}
                         onChange={handleAdditionalDataChange}
                         placeholder="Additional data..."
-                        style={{ padding: '5px', width: '100%' }}
                     />
-                    <div style={{ marginTop: '10px', textAlign: 'right' }}>
-                        <button onClick={handlePromptCancel} style={{ marginRight: '10px', padding: '5px' }}>
-                            Cancel
-                        </button>
-                        <button onClick={handlePromptSubmit} style={{ padding: '5px' }}>
-                            Submit
-                        </button>
-                    </div>
+                    <button onClick={handlePromptSubmit} className="submit-btn">
+                        Submit
+                    </button>
+                    <button onClick={handlePromptCancel} className="cancel-btn">
+                        Cancel
+                    </button>
                 </div>
             )}
         </div>

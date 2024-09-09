@@ -5,7 +5,7 @@ const loadState = () => {
     try {
         const serializedState = localStorage.getItem('store');
         if (serializedState === null) {
-            return undefined;  // Return undefined if no state is found
+            return undefined; // Return undefined if no state is found
         }
         return JSON.parse(serializedState);
     } catch (err) {
@@ -26,9 +26,9 @@ const saveState = (state) => {
 
 const initialState = {
     blocks: [
-        { id: 1, name: 'Task 1', stage: 'To Do', history: [] },
-        { id: 2, name: 'Task 2', stage: 'In Progress', history: [] },
-        { id: 3, name: 'Task 3', stage: 'Done', history: [] }
+        { id: 1, name: 'Task 1', stage: 'To Do', history: ['Created'] },
+        { id: 2, name: 'Task 2', stage: 'In Progress', history: ['Created'] },
+        { id: 3, name: 'Task 3', stage: 'Done', history: ['Created'] }
     ],
     stages: ['To Do', 'In Progress', 'Done'],
     filterText: '',
@@ -59,7 +59,7 @@ const taskSlice = createSlice({
                 if (allowedTransitions[block.stage].includes(newStage)) {
                     block.stage = newStage;
                     block.history.push(`Moved to ${newStage} ${additionalData ? `with data: ${additionalData}` : ''}`);
-                    state.prompt.show = false;  // Hide prompt after moving block
+                    state.prompt.show = false; // Hide prompt after moving block
                     state.prompt.additionalData = '';
                 }
             }
@@ -107,16 +107,36 @@ const taskSlice = createSlice({
         },
         setAdditionalData: (state, action) => {
             state.prompt.additionalData = action.payload;
+        },
+        updateBlock: (state, action) => {
+            const { blockId, newName } = action.payload;
+            const block = state.blocks.find(b => b.id === blockId);
+
+            if (block) {
+                block.name = newName;
+                block.history.push(`Renamed to "${newName}"`);
+            }
         }
     }
 });
 
-export const { moveBlock, selectBlock, filterBlocks, addNote, addBlock, removeBlock, showPrompt, hidePrompt, setAdditionalData } = taskSlice.actions;
+export const {
+    moveBlock,
+    selectBlock,
+    filterBlocks,
+    addNote,
+    addBlock,
+    removeBlock,
+    showPrompt,
+    hidePrompt,
+    setAdditionalData,
+    updateBlock
+} = taskSlice.actions;
 
 // Create the store with the loaded state
 const store = configureStore({
     reducer: taskSlice.reducer,
-    preloadedState: loadState()  // Initialize with state from localStorage
+    preloadedState: loadState() // Initialize with state from localStorage
 });
 
 // Subscribe to store changes and save state to localStorage

@@ -1,0 +1,122 @@
+/* App.css */
+
+.app-container {
+    font-family: Arial, sans-serif;
+}
+
+.filter-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.task-input {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.task-input input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.task-input button {
+    padding: 8px 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.stage-container {
+    display: flex;
+    gap: 16px;
+}
+
+.stage {
+    flex: 1;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-height: 200px;
+    background-color: #f9f9f9;
+}
+
+.block-item {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    position: relative;
+}
+
+.block-item .edit-btn,
+.block-item .remove-btn {
+    position: absolute;
+    top: 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.edit-btn {
+    color: #007bff;
+    right: 36px; /* Adjusted position for spacing */
+}
+
+.remove-btn {
+    color: red;
+    right: 8px; /* Adjusted position for spacing */
+}
+
+.selected-block {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.prompt-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.prompt-modal input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.prompt-modal button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.submit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+}
